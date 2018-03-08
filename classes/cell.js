@@ -3,9 +3,6 @@ function Cell(x, y){
     this.y = y;
 	this.wall = false;
 
-	if(random(1) < 0.4 && this.x != 0 && this.y != 0)
-		this.wall = true;
-
     this.f = 0;
     this.g = 0;
     this.h = 0;
@@ -35,12 +32,8 @@ function Cell(x, y){
     }
     
     this.drawCell = function(color, cellSize) {
-		if(this.wall){
-			fill("black");
-		}
-		else
-			fill(color)
+		fill(color)
         noStroke()
-        rect(this.x * cellSize, this.y * cellSize, cellSize - 1, cellSize - 1);
+        rect(this.x * cellSize + 3/2, this.y * cellSize + 3/2, cellSize - 4, cellSize - 4);
     }
 }
