@@ -3,6 +3,8 @@ var bg;
 // For the Canvas ref
 var canvas;
 
+var obs;
+
 // Size of the grid in term of cells
 var gridSize;
 // Size of the cells in term of pixels
@@ -12,6 +14,7 @@ var grid;
 
 // Boolean for checking if the bg need to be drawn (the first time)
 var drawBG = true;
+var drawOBS = true;
 // Boolean for checking if the bg will be drawn or not
 var bgToggle = true;
 // Boolean for checking is the algorithm has started
@@ -42,6 +45,9 @@ function setup() {
 	// Create the graphic for the bg and set it density to 1
 	bg = createGraphics(800, 800);
 	bg.pixelDensity(1);
+	
+	obs = createGraphics(800, 800);
+	obs.pixelDensity(1);
 	// Set the framerate to regulate the speed of the simulation
 	frameRate(30);  
 	// Number of cells in the grid
@@ -51,8 +57,8 @@ function setup() {
 	// Array of obstacles
 	ostacoli = [];
 	
-	start = new Cell(0, 0);
-	end = new Cell(gridSize - 1, gridSize - 1);
+	start = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
+	end = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
     grid = initArray();
 	frontiera = new BinaryHeap(function(cell){
         return cell.f;
@@ -73,22 +79,43 @@ function draw(){
 		bg.background(color(0));
 		for(var i = 0; i < gridSize; i++){
             for (var j = 0; j < gridSize; j++){
-				bg.fill(color(255, 225, 225));
+				bg.fill(color(225));
 				bg.noStroke()
 				bg.rect(i * cellSize, j * cellSize, cellSize - 1, cellSize - 1);           
 			}
 		} 
 		drawBG = false;
 	}
+	if (drawOBS){
+		/* Draw Obstacles */
+		for(var i = 0; i < ostacoli.length; i++){
+			obs.fill(color(30, 20, 10));
+			obs.noStroke();
+			var found = false;
+			var q = 0;
+			while(!found && q < ostacoli[i].neighbors.length){
+				var ne = ostacoli[i].neighbors[q];
+				if(ne.wall && ((ne.x === ostacoli[i].x + 1 && ne.y === ostacoli[i].y)
+					|| (ne.x === ostacoli[i].x - 1 && ne.y === ostacoli[i].y)
+					|| (ne.x === ostacoli[i].x && ne.y === ostacoli[i].y + 1)
+					|| (ne.x === ostacoli[i].x && ne.y === ostacoli[i].y - 1))){
+					found = true;
+				}
+				else
+					q++;
+			}
+			if (!found)
+				obs.ellipse(ostacoli[i].x * cellSize + cellSize / 2, ostacoli[i].y * cellSize + cellSize / 2, cellSize * 4 / 5)
+			else{
+				obs.rect(ostacoli[i].x * cellSize, ostacoli[i].y * cellSize, cellSize, cellSize, 10);
+			}
+		}
+		drawOBS = false;
+	}
 	if(bgToggle)
 		image(bg, 0, 0);
-	/* Draw Obstacles */
-	for(var i = 0; i < ostacoli.length; i++){
-		//ostacoli[i].drawCell(color(0), cellSize);
-		fill(color(0));
-		noStroke();
-		ellipse(ostacoli[i].x * cellSize + cellSize / 2, ostacoli[i].y * cellSize + cellSize / 2, cellSize / 2)
-	}
+	image(obs, 0, 0);
+
 	if(started){
 		var current;
 		if (running){
@@ -100,10 +127,10 @@ function draw(){
 
 		/* Draw OpenSet */
 		for(var i = 0; i < frontiera.size(); i++)
-			frontiera.content[i].drawCell(color(255, 0, 0), cellSize);
+			frontiera.content[i].drawCell(color(255, 180, 180), cellSize);
 		/* Draw ClosedSet */
 		for(var i = 0; i < esplorati.length; i++)
-			esplorati[i].drawCell(color(0, 255, 0), cellSize);
+			esplorati[i].drawCell(color(125, 0, 125), cellSize);
 		if(!failed){
 			/* Calculate path to the current node */
 			var path = [];
@@ -122,14 +149,13 @@ function draw(){
 			strokeWeight(cellSize / 4);
 			beginShape();
 			for(var i = 0; i < path.length; i++){
-				//path[i].drawCell(color(20, 100, 125), cellSize);
 				vertex(path[i].x * cellSize + cellSize / 2, path[i].y * cellSize + cellSize / 2);
 			}
 			endShape();
 		}
 	}
-	start.drawCell(color(0, 250, 250), cellSize);
-	end.drawCell(color(250, 250, 0), cellSize);
+	start.drawCell(color(0, 125, 250), cellSize);
+	end.drawCell(color(255, 0, 0), cellSize);
 }
 
 function algorithm(){
@@ -137,6 +163,7 @@ function algorithm(){
 		var current = frontiera.pop();
         if(current ===  end){
 			console.log("Done");
+			noLoop();
 			running = false;
 		}
 		else{
@@ -175,6 +202,7 @@ function algorithm(){
         console.log("Fail");
 		running = false;
 		failed = true;
+		noLoop();
         return;
 	}
 	return current;
@@ -213,7 +241,8 @@ function initArray(){
 }
 
 function gridToggle(){
-    bgToggle = !bgToggle;
+	bgToggle = !bgToggle;
+	draw();
 }
 
 function startSimulation(){

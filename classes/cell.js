@@ -34,6 +34,6 @@ function Cell(x, y){
     this.drawCell = function(color, cellSize) {
 		fill(color)
         noStroke()
-        rect(this.x * cellSize + 3/2, this.y * cellSize + 3/2, cellSize - 4, cellSize - 4);
+		rect(this.x * cellSize + 3/2, this.y * cellSize + 3/2, cellSize - 4, cellSize - 4, 5);
     }
 }

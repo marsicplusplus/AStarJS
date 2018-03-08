@@ -1,8 +1,5 @@
 canvas{
-	border-top-style: solid;
-	border-top-color: black;
-	border-top-width: 1px;
-	border-left-style: solid;
-	border-left-color: black;
-	border-left-width: 1px;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
 }
