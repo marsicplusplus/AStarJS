@@ -39,14 +39,15 @@ var last;
 
 
 function setup() {
+	var canvasSize = window.innerHeight - 10;
 	// Create the canvas and attach it to the div
-	canvas = createCanvas(800, 800)
+	canvas = createCanvas(canvasSize, canvasSize)
 	canvas.parent("p5Canvas");
 	// Create the graphic for the bg and set it density to 1
-	bg = createGraphics(800, 800);
+	bg = createGraphics(canvasSize, canvasSize);
 	bg.pixelDensity(1);
 	
-	obs = createGraphics(800, 800);
+	obs = createGraphics(canvasSize,canvasSize);
 	obs.pixelDensity(1);
 	// Set the framerate to regulate the speed of the simulation
 	frameRate(30);  
