@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>A* in JS</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" media="screen" href="styles\bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="styles\main.css" />
     <script src = "scripts\p5.js"></script>
     <script src = "classes\binaryHeap.js"></script>
@@ -11,19 +12,26 @@
     <script src = "scripts\mainHeap.js" ></script>
 </head>
 <body>
-	<div style = "margin-top: 10px;" class = "">
-		<div class = "">
-			<div id = "p5Canvas" class = "">
+	<div style = "margin-top: 10px;" class = "container">
+		<div class = "row">
+			<div id = "p5Canvas" class = "col-sm">
 			</div>
-			<div class = "" > 
-				<div class = "">
-					<button class = "button" onclick="gridToggle()">Toggle Grid</button>
-					<br /> 
+			<div class = "col-sm" > 
+				<div class = "container">
+					<div class = "row">
+						<div class = "col-sm">
+								<button class = "btn btn-dark" onclick="gridToggle()">Toggle Grid</button>
+						</div>
+					</div>
 					<!--
 					<button class = "button" onclick="step()">Step</button>
 					-->
-					<br /> 
-					<button class = "button" onclick="startSimulation()" id = "startButton" >Start</button>
+					<br> 
+					<div class = "row">
+						<div class = "col-sm">
+							<button class = "btn btn-dark" onclick="startSimulation()" id = "startButton" >Start</button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

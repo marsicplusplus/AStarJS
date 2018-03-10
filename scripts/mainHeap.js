@@ -90,24 +90,38 @@ function draw(){
 		/* Draw Obstacles */
 		for(var i = 0; i < ostacoli.length; i++){
 			obs.fill(color(30, 20, 10));
-			obs.noStroke();
-			var found = false;
+			var found = 0;
 			var q = 0;
-			while(!found && q < ostacoli[i].neighbors.length){
+			while(found < 4 && q < ostacoli[i].neighbors.length){
 				var ne = ostacoli[i].neighbors[q];
-				if(ne.wall && ((ne.x === ostacoli[i].x + 1 && ne.y === ostacoli[i].y)
-					|| (ne.x === ostacoli[i].x - 1 && ne.y === ostacoli[i].y)
-					|| (ne.x === ostacoli[i].x && ne.y === ostacoli[i].y + 1)
-					|| (ne.x === ostacoli[i].x && ne.y === ostacoli[i].y - 1))){
-					found = true;
-				}
-				else
-					q++;
+				if(ne.wall){
+					obs.stroke(30, 20, 10);
+					obs.strokeWeight(cellSize / 2);
+					obs.beginShape();
+					obs.vertex(ostacoli[i].x * cellSize + cellSize / 2, ostacoli[i].y * cellSize + cellSize / 2);
+					if (ne.x === ostacoli[i].x + 1 && ne.y === ostacoli[i].y){
+						obs.vertex(ne.x * cellSize, ne.y * cellSize + cellSize / 2);
+						found++;
+					}
+					if (ne.x === ostacoli[i].x - 1 && ne.y === ostacoli[i].y){
+						obs.vertex(ostacoli[i].x * cellSize, ne.y * cellSize + cellSize / 2);
+						found++;
+					}
+					if (ne.x === ostacoli[i].x && ne.y === ostacoli[i].y + 1){
+						obs.vertex(ne.x * cellSize + cellSize / 2, ne.y * cellSize);
+						found++;
+					}
+					if(ne.x === ostacoli[i].x && ne.y === ostacoli[i].y - 1){
+						obs.vertex(ne.x * cellSize + cellSize / 2, ostacoli[i].y * cellSize);
+						found++;
+					}
+					obs.endShape();
+				} 
+				
+				q++;
 			}
-			if (!found)
-				obs.ellipse(ostacoli[i].x * cellSize + cellSize / 2, ostacoli[i].y * cellSize + cellSize / 2, cellSize * 4 / 5)
-			else{
-				obs.rect(ostacoli[i].x * cellSize, ostacoli[i].y * cellSize, cellSize, cellSize, 10);
+			if(found == 0){
+				obs.ellipse(ostacoli[i].x * cellSize + cellSize / 2, ostacoli[i].y * cellSize + cellSize / 2, cellSize/4);
 			}
 		}
 		drawOBS = false;
