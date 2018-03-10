@@ -5,6 +5,8 @@ var canvas;
 
 var obs;
 
+var canvasSize;
+
 // Size of the grid in term of cells
 var gridSize;
 // Size of the cells in term of pixels
@@ -21,9 +23,18 @@ var bgToggle = true;
 var running = false;
 // Boolean for checking if the algorithm has failed
 var failed = false;
+
+var completed = false;
 // Boolean for checking if the algorithm has started
 var started = false;
 
+var dragStart = false;
+var dragEnd = false;
+var dragWalls = false;
+
+var lastWall;
+var mouseOffX;
+var mouseOffY;
 // The OpenSet, managed by a min-heap
 var frontiera;
 // The ClosedSet, managed as an array
@@ -39,7 +50,7 @@ var last;
 
 
 function setup() {
-	var canvasSize = window.innerHeight - 10;
+	canvasSize = window.innerHeight - 10;
 	// Create the canvas and attach it to the div
 	canvas = createCanvas(canvasSize, canvasSize)
 	canvas.parent("p5Canvas");
@@ -60,7 +71,8 @@ function setup() {
 	
 	start = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
 	end = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
-    grid = initArray();
+	grid = initArray();
+	generateWalls();
 	frontiera = new BinaryHeap(function(cell){
         return cell.f;
 	});
@@ -118,7 +130,6 @@ function draw(){
 					}
 					obs.endShape();
 				} 
-				
 				q++;
 			}
 			if(found == 0){
@@ -160,7 +171,7 @@ function draw(){
 			if(running)
 				stroke(255, 0, 255);
 			else
-				stroke(80, 110, 200);
+				stroke(20, 110, 200);
 			strokeWeight(cellSize / 4);
 			beginShape();
 			for(var i = 0; i < path.length; i++){
@@ -180,6 +191,7 @@ function algorithm(){
 			console.log("Done");
 			noLoop();
 			running = false;
+			complete = true;
 		}
 		else{
 			esplorati.push(current);
@@ -240,10 +252,6 @@ function initArray(){
 				cl[j] = end;
 			else
 				cl[j] = new Cell(i, j);
-			if(random(1) < 0.4 && cl[j] != start && cl[j] != end){
-				cl[j].wall = true;
-				ostacoli.push(cl[j]);
-			}
         }
         tmp[i] = cl;
     }
@@ -255,9 +263,116 @@ function initArray(){
     return tmp;
 }
 
+function mouseDragged(){
+	if (mouseX > 0 && mouseX < canvasSize && mouseY > 0 && mouseY < canvasSize){
+		if(dragStart){
+			start.x = mouseX / cellSize - mouseOffX;
+			start.y = mouseY / cellSize - mouseOffY;
+		}
+		else if(dragWalls){
+			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
+			if(lastWall != undefined && (c.x != lastWall.x || c.y != lastWall.y)){
+				if (c.wall){
+					removeFromArray(ostacoli, c);
+					c.wall = false;
+				}
+				else{
+					c.wall = true;
+					ostacoli.push(c);
+				}
+				lastWall = c;
+				drawOBS = true;
+				obs.clear();
+			}
+		}
+	}
+}
+function mouseReleased(){
+	if (dragStart){
+		dragStart = false;
+		start.x = Math.floor(start.x);
+		start.y = Math.floor(start.y);
+		if(grid[start.x][start.y].wall){
+			grid[start.x][start.y].wall = false;
+			removeFromArray(ostacoli, grid[start.x][start.y]);
+			drawOBS = true;
+			obs.clear();
+		}
+		grid[start.x][start.y] = start;
+		start.addNeighbors(grid);
+		frontiera.push(start);
+	}
+	if(dragWalls){
+		dragWalls = false;
+		lastWall = undefined;
+	}
+}
+function mousePressed(){
+	if(mouseX < canvasSize && mouseX > 0 && mouseY > 0 && mouseY < canvasSize){
+		var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
+		if(c === start){
+			console.log("Start");
+			dragStart = true;
+			frontiera.remove(start);
+			mouseOffX = (mouseX / cellSize - c.x)
+			mouseOffY = (mouseY / cellSize - c.y)
+		}
+		else if (c === end){
+			console.log("End");
+			dragEnd = true;
+		}
+		else {
+			console.log("Wall");
+			dragWalls = true;
+			if(c.wall){
+				removeFromArray(ostacoli, c);
+				c.wall = false;
+			}else{
+				c.wall = true;
+				ostacoli.push(c);
+			}
+			drawOBS = true;
+			obs.clear();
+			lastWall = c;
+		}
+	}
+}
+
 function gridToggle(){
 	bgToggle = !bgToggle;
 	draw();
+}
+
+function removeFromArray(arr, el){
+	for(var i = arr.length - 1; i >= 0; i--){
+		if(arr[i] === el){
+			arr.splice(i, 1);
+			return true;
+		}
+	}
+	return false;
+}
+
+function clearWalls(){
+	for(var i = 0; i < ostacoli.length; i++)
+		ostacoli[i].wall = false;
+	ostacoli = [];
+	drawOBS = true;
+	obs.clear();
+}
+
+function generateWalls(){
+	clearWalls();
+    for (i = 0; i < gridSize; i++){
+        for (j = 0; j < gridSize; j++){
+			if(random(1) < 0.4 && grid[i][j] != start && grid[i][j] != end){
+				grid[i][j].wall = true;
+				ostacoli.push(grid[i][j]);
+			}
+        }
+	}
+	drawOBS = true;
+	obs.clear();
 }
 
 function startSimulation(){

@@ -12,27 +12,29 @@
     <script src = "scripts\mainHeap.js" ></script>
 </head>
 <body>
-	<div style = "margin-top: 10px;" class = "container">
+	<div style = "margin-top: 10px; margin-bottom: 10px;" class = "container">
 		<div class = "row">
 			<div id = "p5Canvas" class = "col-sm">
 			</div>
 			<div class = "col-sm" > 
-				<div class = "container">
-					<div class = "row">
-						<div class = "col-sm">
-								<button class = "btn btn-dark" onclick="gridToggle()">Toggle Grid</button>
-						</div>
-					</div>
-					<!--
-					<button class = "button" onclick="step()">Step</button>
-					-->
-					<br> 
-					<div class = "row">
-						<div class = "col-sm">
-							<button class = "btn btn-dark" onclick="startSimulation()" id = "startButton" >Start</button>
-						</div>
-					</div>
+				<div class = "btn-toolbar-vertical">
+					<button class = "btn btn-dark btn-block" onclick="gridToggle()">Toggle Grid</button>
+
+					<button class = "btn btn-dark btn-block" onclick="startSimulation()" id = "startButton" >Start</button>
+
+					<button class = "btn btn-dark btn-block" onclick="clearWalls()" id = "clearButton" >Clear Walls</button>
+
+					<button class = "btn btn-dark btn-block" onclick="generateWalls()" id = "generateWallsButton" >New Walls</button>
+
 				</div>
+				<br>
+				<h4>W.I.P.</h4>
+				<p>Still need to refresh the page for a new "run"!</p>
+			
+			</div>
+		</div>
+		<div class = "row">
+			<div class = "col-sm">
 			</div>
 		</div>
 	</div>

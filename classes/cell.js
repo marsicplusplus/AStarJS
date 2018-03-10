@@ -12,6 +12,7 @@ function Cell(x, y){
     this.neighbors = [];
 
     this.addNeighbors = function (grid){
+		this.neighbors = [];
         if(this.x < grid.length - 1)
             this.neighbors.push(grid[this.x + 1][this.y]);
         if(this.x > 0)
