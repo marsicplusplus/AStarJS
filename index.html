@@ -12,11 +12,23 @@
     <script src = "scripts\mainHeap.js" ></script>
 </head>
 <body>
-	<div style = "margin-top: 10px; margin-bottom: 10px;" class = "container">
+	<div style = "margin-top: 10px; margin-bottom: 10px;" class = "container-fluid">
 		<div class = "row">
-			<div id = "p5Canvas" class = "col-sm">
-			</div>
-			<div class = "col-sm" > 
+			<div class = "col-sm">
+				<h4>
+					Current:
+				</h4>
+				<ul>
+					<li><div class = "cube startingCube"></div> is the starting point;</li>
+					<li><div class = "cube endingCube"></div> is the ending point;</li>
+					<li><div class = "cube obstacleCube"></div> are the walls;</li>
+					<li><div class = "cube opensetCube"></div> is the open set;</li>
+					<li><div class = "cube closedsetCube"></div> is the closed set;</li>
+
+					<li>Click and drag from a white cell or from a wall to add and remove walls;</li>
+					<li>Click and drag the starting point or the ending point to reposition them;</li>
+					<li>Refresh the page for a new run;</li>
+				</ul>
 				<div class = "btn-toolbar-vertical">
 					<button class = "btn btn-dark btn-block" onclick="gridToggle()">Toggle Grid</button>
 
@@ -25,17 +37,15 @@
 					<button class = "btn btn-dark btn-block" onclick="clearWalls()" id = "clearButton" >Clear Walls</button>
 
 					<button class = "btn btn-dark btn-block" onclick="generateWalls()" id = "generateWallsButton" >New Walls</button>
-
 				</div>
 				<br>
-				<h4>W.I.P.</h4>
-				<p>Still need to refresh the page for a new "run"!</p>
-			
+				<p>
+					<span>The Shortest path is: </span><span id = "pathLength">0</span><span> cell long;</span>
+				</p>
 			</div>
-		</div>
-		<div class = "row">
-			<div class = "col-sm">
+			<div id = "p5Canvas" class = "col-sm">
 			</div>
+			<div class = "col-sm"></div>
 		</div>
 	</div>
 </body>

@@ -2,9 +2,9 @@
 var bg;
 // For the Canvas ref
 var canvas;
-
+// Graphics object for the obstacles
 var obs;
-
+// The size of the canvas
 var canvasSize;
 
 // Size of the grid in term of cells
@@ -16,6 +16,7 @@ var grid;
 
 // Boolean for checking if the bg need to be drawn (the first time)
 var drawBG = true;
+// Boolean for checking if the obstacles need to be redrawn (added/removed obstacles)
 var drawOBS = true;
 // Boolean for checking if the bg will be drawn or not
 var bgToggle = true;
@@ -23,16 +24,18 @@ var bgToggle = true;
 var running = false;
 // Boolean for checking if the algorithm has failed
 var failed = false;
-
+// If the algorthm has been executed on the page
 var completed = false;
 // Boolean for checking if the algorithm has started
 var started = false;
 
+// If I'm dragging the start, the end or if I'm drawing/deleting walls
 var dragStart = false;
 var dragEnd = false;
 var dragWalls = false;
-
+// The last cell I was in to avoid deleting a wall right after creating it and viceversa
 var lastWall;
+// Offset of the mouse when something is selected
 var mouseOffX;
 var mouseOffY;
 // The OpenSet, managed by a min-heap
@@ -50,7 +53,7 @@ var last;
 
 
 function setup() {
-	canvasSize = window.innerHeight - 10;
+	canvasSize = window.innerHeight - 15;
 	// Create the canvas and attach it to the div
 	canvas = createCanvas(canvasSize, canvasSize)
 	canvas.parent("p5Canvas");
@@ -68,14 +71,17 @@ function setup() {
 	cellSize = canvas.width / gridSize;
 	// Array of obstacles
 	ostacoli = [];
-	
+	// Create start and End cell in Random position each time.
 	start = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
 	end = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
+	// Initialize the grid as a 2 dimensional array and randomly generate the obstacles
 	grid = initArray();
 	generateWalls();
+	// Initialize the open set
 	frontiera = new BinaryHeap(function(cell){
         return cell.f;
 	});
+
 	esplorati = [];
 	// Add the start position to the OpenSet
 	frontiera.push(start);
@@ -105,6 +111,9 @@ function draw(){
 			obs.fill(color(30, 20, 10));
 			var found = 0;
 			var q = 0;
+			/*
+			* If a neighboor of the obstacle in the left, right, top or down position draw connection between them
+			*/
 			while(found < 4 && q < ostacoli[i].neighbors.length){
 				var ne = ostacoli[i].neighbors[q];
 				if(ne.wall){
@@ -133,6 +142,7 @@ function draw(){
 				q++;
 			}
 			if(found == 0){
+				// If no neighboor is a wall just draw an ellipse
 				obs.ellipse(ostacoli[i].x * cellSize + cellSize / 2, ostacoli[i].y * cellSize + cellSize / 2, cellSize/4);
 			}
 		}
@@ -141,9 +151,10 @@ function draw(){
 	if(bgToggle)
 		image(bg, 0, 0);
 	image(obs, 0, 0);
-
+	// If the alg. have been started once
 	if(started){
 		var current;
+		// If it's currently running execute it and retrieve the current node in the open set that have been explored
 		if (running){
 			current = algorithm();
 			last = current;
@@ -166,12 +177,14 @@ function draw(){
 				path.push(tmp.previous);
 				tmp = tmp.previous;
 			}
-			/* Draw The Path */
+			/* Draw The Path, different color if it's completed */
 			noFill();
-			if(running)
+			if(running){
 				stroke(255, 0, 255);
+				document.getElementById("pathLength").textContent = path.length;
+			}
 			else
-				stroke(20, 110, 200);
+				stroke(255, 215, 0);
 			strokeWeight(cellSize / 4);
 			beginShape();
 			for(var i = 0; i < path.length; i++){
@@ -180,13 +193,18 @@ function draw(){
 			endShape();
 		}
 	}
+
+	// Draw the start and the end position
 	start.drawCell(color(0, 125, 250), cellSize);
 	end.drawCell(color(255, 0, 0), cellSize);
 }
 
 function algorithm(){
+	// If the open set is empty, the algorithm has failed;
 	if(frontiera.size() > 0){
+		// Get the node with the lower value of f (Potentially closer to the end)
 		var current = frontiera.pop();
+		// If it's the end we are done
         if(current ===  end){
 			console.log("Done");
 			noLoop();
@@ -194,9 +212,14 @@ function algorithm(){
 			complete = true;
 		}
 		else{
+			// Add the current node to the closed set and explore the neighbors adding them to the openset;
 			esplorati.push(current);
 			for(var i = 0; i < current.neighbors.length; i++){
 				var neigh = current.neighbors[i];
+				// If neigh is not explored yet and it's not a wall, but it's already in the open set calculate the new g.
+				// If the new g is lower than the old one then we have found a new optimal path to g.
+				// Update the g value. If it's not in the open set then we found it for the first time, update the g.
+				// If it's a new path then update the h and the f of the node, then let's memorize the node from where we got there.
 				if(!esplorati.includes(neigh) && !neigh.wall){  
 					var tmpG = current.g + neigh.weight;
 					var newPath = false;
@@ -234,7 +257,10 @@ function algorithm(){
 	}
 	return current;
 }
-
+/*
+* Calculate the distance between 2 given cells.
+* TODO: Choose between different heuristcs
+*/
 function heuristic(cell, goal){
 	// MD
 	return Math.abs(goal.x - cell.x) + Math.abs(goal.y - cell.y);
@@ -269,6 +295,10 @@ function mouseDragged(){
 			start.x = mouseX / cellSize - mouseOffX;
 			start.y = mouseY / cellSize - mouseOffY;
 		}
+		else if(dragEnd){
+			end.x = mouseX / cellSize - mouseOffX;
+			end.y = mouseY / cellSize - mouseOffY;
+		}
 		else if(dragWalls){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
 			if(lastWall != undefined && (c.x != lastWall.x || c.y != lastWall.y)){
@@ -290,11 +320,11 @@ function mouseDragged(){
 function mouseReleased(){
 	if (dragStart){
 		dragStart = false;
-		start.x = Math.floor(start.x);
-		start.y = Math.floor(start.y);
+		start.x = Math.floor(mouseX / cellSize);
+		start.y = Math.floor(mouseY / cellSize);
 		if(grid[start.x][start.y].wall){
-			grid[start.x][start.y].wall = false;
 			removeFromArray(ostacoli, grid[start.x][start.y]);
+			grid[start.x][start.y].wall = false;
 			drawOBS = true;
 			obs.clear();
 		}
@@ -302,9 +332,39 @@ function mouseReleased(){
 		start.addNeighbors(grid);
 		frontiera.push(start);
 	}
+	if (dragEnd){
+		dragEnd = false;
+		end.x = Math.floor(mouseX / cellSize);
+		end.y = Math.floor(mouseY / cellSize);
+		if(grid[end.x][end.y].wall){
+			removeFromArray(ostacoli, grid[end.x][end.y]);
+			grid[end.x][end.y].wall = false;
+			drawOBS = true;
+			obs.clear();
+		}
+		grid[end.x][end.y] = end;
+		end.addNeighbors(grid);
+		for(var i = 0; i < end.neighbors.length; i++){
+			end.neighbors[i].addNeighbors(grid);
+		}
+
+	}
 	if(dragWalls){
+		var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
+		if(c != lastWall){
+			if(c.wall){
+				removeFromArray(ostacoli, c);
+				c.wall = false;
+			}else{
+				c.wall = true;
+				ostacoli.push(c);
+			}
+		}	
 		dragWalls = false;
 		lastWall = undefined;
+		drawOBS = true;
+		obs.clear();
+		lastWall = c;
 	}
 }
 function mousePressed(){
@@ -319,7 +379,12 @@ function mousePressed(){
 		}
 		else if (c === end){
 			console.log("End");
+			mouseOffX = (mouseX / cellSize - c.x)
+			mouseOffY = (mouseY / cellSize - c.y)
 			dragEnd = true;
+			for(var i = 0; i < c.neighbors.length; i++){
+				c.neighbors[i].addNeighbors(grid);
+			}
 		}
 		else {
 			console.log("Wall");
