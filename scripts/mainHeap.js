@@ -225,6 +225,7 @@ function algorithm(){
 					var newPath = false;
 					var oldNode = false;
 					if(frontiera.content.includes(neigh)){   
+						console.log("Already here");
 						if (tmpG < neigh.g){
 							frontiera.remove(neigh);
 							oldNode = true;
@@ -232,6 +233,7 @@ function algorithm(){
 							newPath = true;
 						}
 					}else{
+						console.log("Never been here");
 						neigh.g = tmpG;
 						newPath = true;
 						oldNode = true;
@@ -241,6 +243,7 @@ function algorithm(){
 						neigh.f = neigh.g + neigh.h;
 						neigh.previous = current;
 						if(oldNode){
+							console.log("Pushed");
 							frontiera.push(neigh);
 						}
 					}
@@ -330,6 +333,9 @@ function mouseReleased(){
 		}
 		grid[start.x][start.y] = start;
 		start.addNeighbors(grid);
+		for(var i = 0; i < start.neighbors.length; i++){
+			start.neighbors[i].addNeighbors(grid);
+		}
 		frontiera.push(start);
 	}
 	if (dragEnd){
@@ -375,13 +381,18 @@ function mousePressed(){
 		var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
 		if(c === start){
 			console.log("Start");
+			grid[start.x][start.y] = new Cell(start.x, start.y);
 			dragStart = true;
 			frontiera.remove(start);
-			mouseOffX = (mouseX / cellSize - c.x)
-			mouseOffY = (mouseY / cellSize - c.y)
+			mouseOffX = (mouseX / cellSize - c.x);
+			mouseOffY = (mouseY / cellSize - c.y);
+			for(var i = 0; i < c.neighbors.length; i++){
+				c.neighbors[i].addNeighbors(grid);
+			}
 		}
 		else if (c === end){
 			console.log("End");
+			grid[end.x][end.y] = new Cell(end.x, end.y);
 			mouseOffX = (mouseX / cellSize - c.x)
 			mouseOffY = (mouseY / cellSize - c.y)
 			dragEnd = true;

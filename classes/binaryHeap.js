@@ -8,7 +8,7 @@ function BinaryHeap(fun){
     this.scoreFunction = fun;
 
     this.push = function(element){
-        this.content.push(element);
+		this.content.push(element);
         this.bubbleUp(this.content.length - 1);
     };
 
