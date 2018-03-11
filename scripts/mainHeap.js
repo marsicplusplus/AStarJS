@@ -301,7 +301,7 @@ function mouseDragged(){
 		}
 		else if(dragWalls){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
-			if(lastWall != undefined && (c.x != lastWall.x || c.y != lastWall.y)){
+			if(lastWall != undefined && (c != lastWall) && c != start && c != end){
 				if (c.wall){
 					removeFromArray(ostacoli, c);
 					c.wall = false;
@@ -351,13 +351,16 @@ function mouseReleased(){
 	}
 	if(dragWalls){
 		var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
-		if(c != lastWall){
+		if(c != lastWall && c != start && c != end){
 			if(c.wall){
 				removeFromArray(ostacoli, c);
 				c.wall = false;
 			}else{
 				c.wall = true;
 				ostacoli.push(c);
+			}
+			for(var i = 0; i < c.neighbors.length; i++){
+				c.neighbors[i].addNeighbors();
 			}
 		}	
 		dragWalls = false;
