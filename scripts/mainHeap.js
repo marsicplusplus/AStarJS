@@ -33,6 +33,7 @@ var started = false;
 var dragStart = false;
 var dragEnd = false;
 var dragWalls = false;
+var drawWalls = false;
 // The last cell I was in to avoid deleting a wall right after creating it and viceversa
 var lastWall;
 // Offset of the mouse when something is selected
@@ -309,17 +310,26 @@ function mouseDragged(){
 					removeFromArray(ostacoli, c);
 					c.wall = false;
 				}
-				else{
-					c.wall = true;
-					ostacoli.push(c);
-				}
+
 				lastWall = c;
 				drawOBS = true;
 				obs.clear();
 			}
 		}
+		else if(drawWalls){
+			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
+			if(lastWall != undefined && (c != lastWall) && c != start && c != end){
+				if(!c.wall){
+					c.wall = true;
+					ostacoli.push(c);
+					lastWall = c;
+					drawOBS = true;
+					obs.clear();
+				}
+			}
+		}
 	}
-}
+}	
 function mouseReleased(){
 	if (dragStart){
 		dragStart = false;
@@ -356,24 +366,17 @@ function mouseReleased(){
 
 	}
 	if(dragWalls){
-		var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
-		if(c != lastWall && c != start && c != end){
-			if(c.wall){
-				removeFromArray(ostacoli, c);
-				c.wall = false;
-			}else{
-				c.wall = true;
-				ostacoli.push(c);
-			}
-			for(var i = 0; i < c.neighbors.length; i++){
-				c.neighbors[i].addNeighbors();
-			}
-		}	
 		dragWalls = false;
-		lastWall = undefined;
 		drawOBS = true;
 		obs.clear();
-		lastWall = c;
+		lastWall = undefined;
+	}
+	if(drawWalls){
+		drawWalls = false;
+		drawOBS = true;
+		obs.clear();
+		lastWall = undefined;
+			
 	}
 }
 function mousePressed(){
@@ -400,16 +403,19 @@ function mousePressed(){
 				c.neighbors[i].addNeighbors(grid);
 			}
 		}
-		else {
+		else if(c.wall){
 			console.log("Wall");
 			dragWalls = true;
-			if(c.wall){
-				removeFromArray(ostacoli, c);
-				c.wall = false;
-			}else{
-				c.wall = true;
-				ostacoli.push(c);
-			}
+			removeFromArray(ostacoli, c);
+			c.wall = false;
+			drawOBS = true;
+			obs.clear();
+			lastWall = c;
+		}
+		else{
+			drawWalls = true;
+			c.wall = true;
+			ostacoli.push(c);
 			drawOBS = true;
 			obs.clear();
 			lastWall = c;
