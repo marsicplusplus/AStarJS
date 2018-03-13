@@ -32,7 +32,7 @@ var started = false;
 // If I'm dragging the start, the end or if I'm drawing/deleting walls
 var dragStart = false;
 var dragEnd = false;
-var dragWalls = false;
+var deleteWalls = false;
 var drawWalls = false;
 // The last cell I was in to avoid deleting a wall right after creating it and viceversa
 var lastWall;
@@ -303,7 +303,7 @@ function mouseDragged(){
 			end.x = mouseX / cellSize - mouseOffX;
 			end.y = mouseY / cellSize - mouseOffY;
 		}
-		else if(dragWalls){
+		else if(deleteWalls){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
 			if(lastWall != undefined && (c != lastWall) && c != start && c != end){
 				if (c.wall){
@@ -363,10 +363,9 @@ function mouseReleased(){
 		for(var i = 0; i < end.neighbors.length; i++){
 			end.neighbors[i].addNeighbors(grid);
 		}
-
 	}
-	if(dragWalls){
-		dragWalls = false;
+	if(deleteWalls){
+		deleteWalls = false;
 		drawOBS = true;
 		obs.clear();
 		lastWall = undefined;
@@ -405,7 +404,7 @@ function mousePressed(){
 		}
 		else if(c.wall){
 			console.log("Wall");
-			dragWalls = true;
+			deleteWalls = true;
 			removeFromArray(ostacoli, c);
 			c.wall = false;
 			drawOBS = true;
