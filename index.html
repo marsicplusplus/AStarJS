@@ -4,9 +4,13 @@
     <meta charset="utf-8" />
     <title>A* in JS</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet"> 	
 	<link rel="stylesheet" type="text/css" media="screen" href="styles\bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="styles\main.css" />
-    <script src = "scripts\p5.js"></script>
+	<link rel="stylesheet" type="text/css" media="screen" href="styles\main.css" />
+	<script src = "scripts\popper.min.js"></script>
+	<script src = "scripts\jquery-3.3.1.min.js"></script>
+	<script src = "scripts\bootstrap.min.js"></script>
+	<script src = "scripts\p5.js"></script>
     <script src = "classes\binaryHeap.js"></script>
     <script src = "classes\cell.js"  ></script>
     <script src = "scripts\mainHeap.js" ></script>
@@ -14,7 +18,7 @@
 <body>
 	<div style = "margin-top: 10px; margin-bottom: 10px;" class = "container-fluid">
 		<div class = "row">
-			<div class = "col-sm">
+			<div class = "col-sm-5">
 				<h4>
 					Current:
 				</h4>
@@ -27,12 +31,27 @@
 
 					<li>Click and drag from a white cell or from a wall to add and remove walls;</li>
 					<li>Click and drag the starting point or the ending point to reposition them;</li>
-					<li>Refresh the page for a new run;</li>
+					<li>The refresh button will not change <b>start</b> and <b>end</b> position;</li>
 				</ul>
 				<div class = "btn-toolbar-vertical">
-					<button class = "btn btn-dark btn-block" onclick="gridToggle()">Toggle Grid</button>
-
 					<button class = "btn btn-dark btn-block" onclick="startSimulation()" id = "startButton" >Start</button>
+
+					<button class = "btn btn-dark btn-block" onclick = "restart();">Refresh</button>
+
+					<div class = "dropdown btn-block">
+						<button type = "button" class = "btn btn-dark dropdown-toggle btn-block" id = "dropDownSpeed" data-toggle = "dropdown" aria-haspopup="true" aria-expanded="true">
+							Speed (fps) |
+							<span id = "currentSpeed"> 30fps </span>
+							<span class = "caret"></span>
+						</button>
+						<div class = "dropdown-menu" aria-labelledby="dropDownSpeed">
+							<button id = "10fps" class = "dropdown-item" onclick="changeSpeed(this.id);">10</button>
+							<button id = "30fps" class = "dropdown-item active" onclick="changeSpeed(this.id);">30</button>
+							<button id = "60fps" class = "dropdown-item" onclick="changeSpeed(this.id);">60</button>
+						</div>
+					</div>
+
+					<button class = "btn btn-dark btn-block" onclick="gridToggle()">Toggle Grid</button>
 
 					<button class = "btn btn-dark btn-block" onclick="clearWalls()" id = "clearButton" >Clear Walls</button>
 
@@ -43,7 +62,7 @@
 					<span>The Shortest path is: </span><span id = "pathLength">0</span><span> cell long;</span>
 				</p>
 			</div>
-			<div id = "p5Canvas" class = "col-sm">
+			<div id = "p5Canvas" class = "col-sm-7">
 			</div>
 			<div class = "col-sm"></div>
 		</div>

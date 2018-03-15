@@ -52,6 +52,8 @@ var end;
 // The last cell that has been considered in the algorithm
 var last;
 
+var lastSpeedID = "30fps";
+
 
 function setup() {
 	canvasSize = window.innerHeight - 15;
@@ -88,7 +90,6 @@ function setup() {
 	frontiera.push(start);
 }
 
-
 function draw(){ 
 	background(255);
 	/* 
@@ -96,13 +97,14 @@ function draw(){
 	*	if it's the first time drawing on the screen.
 	*/
 	if (drawBG){
-		bg.background(color(0));
-		for(var i = 0; i < gridSize; i++){
-            for (var j = 0; j < gridSize; j++){
-				bg.fill(color(225));
-				bg.noStroke()
-				bg.rect(i * cellSize, j * cellSize, cellSize - 1, cellSize - 1);           
+		bg.background(color(255));
+		bg.stroke(color(0));
+		bg.strokeWeight(1);
+		for(var i = 1; i < gridSize; i++){
+            for (var j = 1; j < gridSize; j++){
+				bg.line(0, j * cellSize - 1, canvasSize, j * cellSize - 1);           
 			}
+			bg.line(i * cellSize - 1, 0, i * cellSize - 1, canvasSize);           
 		} 
 		drawBG = false;
 	}
@@ -159,6 +161,7 @@ function draw(){
 		if (running){
 			current = algorithm();
 			last = current;
+			completed = true;
 		}
 		else
 			current = last; 
@@ -379,45 +382,47 @@ function mouseReleased(){
 	}
 }
 function mousePressed(){
-	if(mouseX < canvasSize && mouseX > 0 && mouseY > 0 && mouseY < canvasSize){
-		var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
-		if(c === start){
-			console.log("Start");
-			grid[start.x][start.y] = new Cell(start.x, start.y);
-			dragStart = true;
-			frontiera.remove(start);
-			mouseOffX = (mouseX / cellSize - c.x);
-			mouseOffY = (mouseY / cellSize - c.y);
-			for(var i = 0; i < c.neighbors.length; i++){
-				c.neighbors[i].addNeighbors(grid);
+	if(! started){
+		if(mouseX < canvasSize && mouseX > 0 && mouseY > 0 && mouseY < canvasSize){
+			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
+			if(c === start){
+				console.log("Start");
+				grid[start.x][start.y] = new Cell(start.x, start.y);
+				dragStart = true;
+				frontiera.remove(start);
+				mouseOffX = (mouseX / cellSize - c.x);
+				mouseOffY = (mouseY / cellSize - c.y);
+				for(var i = 0; i < c.neighbors.length; i++){
+					c.neighbors[i].addNeighbors(grid);
+				}
 			}
-		}
-		else if (c === end){
-			console.log("End");
-			grid[end.x][end.y] = new Cell(end.x, end.y);
-			mouseOffX = (mouseX / cellSize - c.x)
-			mouseOffY = (mouseY / cellSize - c.y)
-			dragEnd = true;
-			for(var i = 0; i < c.neighbors.length; i++){
-				c.neighbors[i].addNeighbors(grid);
+			else if (c === end){
+				console.log("End");
+				grid[end.x][end.y] = new Cell(end.x, end.y);
+				mouseOffX = (mouseX / cellSize - c.x)
+				mouseOffY = (mouseY / cellSize - c.y)
+				dragEnd = true;
+				for(var i = 0; i < c.neighbors.length; i++){
+					c.neighbors[i].addNeighbors(grid);
+				}
 			}
-		}
-		else if(c.wall){
-			console.log("Wall");
-			deleteWalls = true;
-			removeFromArray(ostacoli, c);
-			c.wall = false;
-			drawOBS = true;
-			obs.clear();
-			lastWall = c;
-		}
-		else{
-			drawWalls = true;
-			c.wall = true;
-			ostacoli.push(c);
-			drawOBS = true;
-			obs.clear();
-			lastWall = c;
+			else if(c.wall){
+				console.log("Wall");
+				deleteWalls = true;
+				removeFromArray(ostacoli, c);
+				c.wall = false;
+				drawOBS = true;
+				obs.clear();
+				lastWall = c;
+			}
+			else{
+				drawWalls = true;
+				c.wall = true;
+				ostacoli.push(c);
+				drawOBS = true;
+				obs.clear();
+				lastWall = c;
+			}
 		}
 	}
 }
@@ -438,29 +443,88 @@ function removeFromArray(arr, el){
 }
 
 function clearWalls(){
-	for(var i = 0; i < ostacoli.length; i++)
-		ostacoli[i].wall = false;
-	ostacoli = [];
-	drawOBS = true;
-	obs.clear();
+	if(completed || failed) 
+		restart();
+	if(!started){
+		for(var i = 0; i < ostacoli.length; i++)
+			ostacoli[i].wall = false;
+		ostacoli = [];
+		drawOBS = true;
+		obs.clear();
+	}
 }
 
 function generateWalls(){
-	clearWalls();
-    for (i = 0; i < gridSize; i++){
-        for (j = 0; j < gridSize; j++){
-			if(random(1) < 0.4 && grid[i][j] != start && grid[i][j] != end){
-				grid[i][j].wall = true;
-				ostacoli.push(grid[i][j]);
+	if(completed || failed)
+		restart();
+	if(!started){
+		clearWalls();
+		for (i = 0; i < gridSize; i++){
+			for (j = 0; j < gridSize; j++){
+				if(random(1) < 0.4 && grid[i][j] != start && grid[i][j] != end){
+					grid[i][j].wall = true;
+					ostacoli.push(grid[i][j]);
+				}
 			}
-        }
+		}
+		drawOBS = true;
+		obs.clear();
 	}
-	drawOBS = true;
-	obs.clear();
+	else{
+		restart();
+	}
 }
 
 function startSimulation(){
 	started = true;
 	running = true;
 	document.getElementById("startButton").disabled = true;
+}
+
+function restart(){
+	drawBG = true;
+	drawOBS = true;
+
+	running = false;
+	failed = false;
+	completed = false;
+	started = false;
+
+	clear();
+	grid = initArray();
+	generateWalls();
+	
+	// Initialize the open set
+	frontiera = new BinaryHeap(function(cell){
+        return cell.f;
+	});
+
+	esplorati = [];
+	// Add the start position to the OpenSet
+	frontiera.push(start);
+
+	document.getElementById("startButton").disabled = false;
+	document.getElementById("pathLength").textContent = 0;
+	loop();
+}
+
+function changeSpeed(id){
+	document.getElementById(lastSpeedID).classList.remove("active");
+	document.getElementById(id).classList.add("active");
+	document.getElementById("currentSpeed").textContent = id;
+	switch(id){
+		case "10fps":
+			frameRate(10);
+			break;
+		case "30fps":
+			frameRate(30);
+			break;
+		case "60fps":
+			frameRate(60);
+			break;
+		default:
+			framerate(1);
+			break;
+	}
+	lastSpeedID = id;
 }

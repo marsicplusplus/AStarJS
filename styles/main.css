@@ -4,6 +4,11 @@ canvas{
 	border-width: 1px;
 }
 
+body{
+	font-family: "Fira Mono";
+	font-size: 14px;
+}
+
 .cube{
 	width: 20px;
 	height: 20px;
