@@ -214,6 +214,7 @@ function algorithm(){
 			noLoop();
 			running = false;
 			complete = true;
+			document.getElementById("restartButton").disabled = false;
 		}
 		else{
 			// Add the current node to the closed set and explore the neighbors adding them to the openset;
@@ -256,6 +257,9 @@ function algorithm(){
 		}
         
     } else{
+		document.getElementById("restartButton").disabled = false;
+		document.getElementById("pathLength").textContent = "∞";
+		document.getElementById("failCase").hidden = false;
         console.log("Fail");
 		running = false;
 		failed = true;
@@ -266,7 +270,6 @@ function algorithm(){
 }
 /*
 * Calculate the distance between 2 given cells.
-* TODO: Choose between different heuristcs
 */
 function heuristic(cell, goal){
 	// MD
@@ -336,8 +339,14 @@ function mouseDragged(){
 function mouseReleased(){
 	if (dragStart){
 		dragStart = false;
-		start.x = Math.floor(mouseX / cellSize);
-		start.y = Math.floor(mouseY / cellSize);
+		if(mouseX < 0 || mouseX > canvasSize || mouseY < 0 || mouseY > canvasSize){
+			start.x = Math.floor((random() * gridSize));
+			start.y = Math.floor((random() * gridSize));
+		}
+		else{
+			start.x = Math.floor(mouseX / cellSize);
+			start.y = Math.floor(mouseY / cellSize);
+		}
 		if(grid[start.x][start.y].wall){
 			removeFromArray(ostacoli, grid[start.x][start.y]);
 			grid[start.x][start.y].wall = false;
@@ -353,8 +362,14 @@ function mouseReleased(){
 	}
 	if (dragEnd){
 		dragEnd = false;
-		end.x = Math.floor(mouseX / cellSize);
-		end.y = Math.floor(mouseY / cellSize);
+		if(mouseX < 0 || mouseX > canvasSize || mouseY < 0 || mouseY > canvasSize){
+			end.x = Math.floor((random() * gridSize));
+			end.y = Math.floor((random() * gridSize));
+		}
+		else{
+			end.x = Math.floor(mouseX / cellSize);
+			end.y = Math.floor(mouseY / cellSize);
+		}
 		if(grid[end.x][end.y].wall){
 			removeFromArray(ostacoli, grid[end.x][end.y]);
 			grid[end.x][end.y].wall = false;
@@ -444,7 +459,7 @@ function removeFromArray(arr, el){
 
 function clearWalls(){
 	if(completed || failed) 
-		restart();
+		refresh();
 	if(!started){
 		for(var i = 0; i < ostacoli.length; i++)
 			ostacoli[i].wall = false;
@@ -452,11 +467,12 @@ function clearWalls(){
 		drawOBS = true;
 		obs.clear();
 	}
+	document.getElementById("restartButton").disabled = true;
 }
 
 function generateWalls(){
 	if(completed || failed)
-		restart();
+		refresh();
 	if(!started){
 		clearWalls();
 		for (i = 0; i < gridSize; i++){
@@ -471,7 +487,7 @@ function generateWalls(){
 		obs.clear();
 	}
 	else{
-		restart();
+		refresh();
 	}
 }
 
@@ -481,7 +497,7 @@ function startSimulation(){
 	document.getElementById("startButton").disabled = true;
 }
 
-function restart(){
+function refresh(){
 	drawBG = true;
 	drawOBS = true;
 
@@ -505,8 +521,29 @@ function restart(){
 
 	document.getElementById("startButton").disabled = false;
 	document.getElementById("pathLength").textContent = 0;
+	document.getElementById("failCase").hidden = true;
+
 	loop();
 }
+
+function restart(){
+	running = false;
+	failed = false;
+	completed = false;
+	started = false;
+	clear();
+	frontiera = new BinaryHeap(function(cell){
+		return cell.f;
+	});
+	esplorati = [];
+	frontiera.push(start);
+	document.getElementById("startButton").disabled = false;
+	document.getElementById("restartButton").disabled = true;
+	document.getElementById("pathLength").textContent = 0;
+	document.getElementById("failCase").hidden = true;
+	loop();
+}
+
 
 function changeSpeed(id){
 	document.getElementById(lastSpeedID).classList.remove("active");

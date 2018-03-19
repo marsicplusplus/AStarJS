@@ -18,7 +18,7 @@
 <body>
 	<div style = "margin-top: 10px; margin-bottom: 10px;" class = "container-fluid">
 		<div class = "row">
-			<div class = "col-sm-5">
+			<div class = "col-sm-4">
 				<h4>
 					Current:
 				</h4>
@@ -31,13 +31,16 @@
 
 					<li>Click and drag from a white cell or from a wall to add and remove walls;</li>
 					<li>Click and drag the starting point or the ending point to reposition them;</li>
+					<li>Drag out from the canvas for random positions</li>
 					<li>The refresh button will not change <b>start</b> and <b>end</b> position;</li>
 				</ul>
 				<div class = "btn-toolbar-vertical">
 					<button class = "btn btn-dark btn-block" onclick="startSimulation()" id = "startButton" >Start</button>
 
-					<button class = "btn btn-dark btn-block" onclick = "restart();">Refresh</button>
+					<button class = "btn btn-dark btn-block" disabled = "true" onclick = "restart();" id = "restartButton">Restart</button>
 
+					<button class = "btn btn-dark btn-block" onclick = "refresh();" id = "refreshButton">Refresh</button>
+					<br>
 					<div class = "dropdown btn-block">
 						<button type = "button" class = "btn btn-dark dropdown-toggle btn-block" id = "dropDownSpeed" data-toggle = "dropdown" aria-haspopup="true" aria-expanded="true">
 							Speed (fps) |
@@ -45,12 +48,12 @@
 							<span class = "caret"></span>
 						</button>
 						<div class = "dropdown-menu" aria-labelledby="dropDownSpeed">
-							<button id = "10fps" class = "dropdown-item" onclick="changeSpeed(this.id);">10</button>
-							<button id = "30fps" class = "dropdown-item active" onclick="changeSpeed(this.id);">30</button>
-							<button id = "60fps" class = "dropdown-item" onclick="changeSpeed(this.id);">60</button>
+							<button id = "10fps" class = "btn-block dropdown-item" onclick="changeSpeed(this.id);">10</button>
+							<button id = "30fps" class = "btn-block dropdown-item active" onclick="changeSpeed(this.id);">30</button>
+							<button id = "60fps" class = "btn-block dropdown-item" onclick="changeSpeed(this.id);">60</button>
 						</div>
 					</div>
-
+					<br>
 					<button class = "btn btn-dark btn-block" onclick="gridToggle()">Toggle Grid</button>
 
 					<button class = "btn btn-dark btn-block" onclick="clearWalls()" id = "clearButton" >Clear Walls</button>
@@ -59,10 +62,11 @@
 				</div>
 				<br>
 				<p>
-					<span>The Shortest path is: </span><span id = "pathLength">0</span><span> cell long;</span>
+					<span>The Shortest path is: </span><span id = "pathLength">0</span><span> cells long;</span>
+					<h1 hidden = "true" id = "failCase">It doesn't exists!</h1>
 				</p>
 			</div>
-			<div id = "p5Canvas" class = "col-sm-7">
+			<div id = "p5Canvas" class = "col-sm-8">
 			</div>
 			<div class = "col-sm"></div>
 		</div>

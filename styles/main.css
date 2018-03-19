@@ -35,3 +35,7 @@ body{
 .closedsetCube{
 	background-color: rgb(125, 0, 125);
 }
+
+#failCase{
+	color: brown;
+}
