@@ -36,6 +36,7 @@ var deleteWalls = false;
 var drawWalls = false;
 // The last cell I was in to avoid deleting a wall right after creating it and viceversa
 var lastWall;
+var oldPos = {x : undefined, y : undefined};
 // Offset of the mouse when something is selected
 var mouseOffX;
 var mouseOffY;
@@ -230,7 +231,6 @@ function algorithm(){
 					var newPath = false;
 					var oldNode = false;
 					if(frontiera.content.includes(neigh)){   
-						console.log("Already here");
 						if (tmpG < neigh.g){
 							frontiera.remove(neigh);
 							oldNode = true;
@@ -238,7 +238,6 @@ function algorithm(){
 							newPath = true;
 						}
 					}else{
-						console.log("Never been here");
 						neigh.g = tmpG;
 						newPath = true;
 						oldNode = true;
@@ -248,7 +247,6 @@ function algorithm(){
 						neigh.f = neigh.g + neigh.h;
 						neigh.previous = current;
 						if(oldNode){
-							console.log("Pushed");
 							frontiera.push(neigh);
 						}
 					}
@@ -340,13 +338,14 @@ function mouseReleased(){
 	if (dragStart){
 		dragStart = false;
 		if(mouseX < 0 || mouseX > canvasSize || mouseY < 0 || mouseY > canvasSize){
-			start.x = Math.floor((random() * gridSize));
-			start.y = Math.floor((random() * gridSize));
+			start.x = oldPos.x;
+			start.y = oldPos.y;
 		}
 		else{
 			start.x = Math.floor(mouseX / cellSize);
 			start.y = Math.floor(mouseY / cellSize);
 		}
+		oldPos = {x : undefined, y : undefined};
 		if(grid[start.x][start.y].wall){
 			removeFromArray(ostacoli, grid[start.x][start.y]);
 			grid[start.x][start.y].wall = false;
@@ -363,13 +362,14 @@ function mouseReleased(){
 	if (dragEnd){
 		dragEnd = false;
 		if(mouseX < 0 || mouseX > canvasSize || mouseY < 0 || mouseY > canvasSize){
-			end.x = Math.floor((random() * gridSize));
-			end.y = Math.floor((random() * gridSize));
+			end.x = oldPos.x;
+			end.y = oldPos.y;
 		}
 		else{
 			end.x = Math.floor(mouseX / cellSize);
 			end.y = Math.floor(mouseY / cellSize);
 		}
+		oldPos = {x : undefined, y : undefined};
 		if(grid[end.x][end.y].wall){
 			removeFromArray(ostacoli, grid[end.x][end.y]);
 			grid[end.x][end.y].wall = false;
@@ -402,6 +402,7 @@ function mousePressed(){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
 			if(c === start){
 				console.log("Start");
+				oldPos.x = start.x; oldPos.y = start.y;
 				grid[start.x][start.y] = new Cell(start.x, start.y);
 				dragStart = true;
 				frontiera.remove(start);
@@ -413,6 +414,7 @@ function mousePressed(){
 			}
 			else if (c === end){
 				console.log("End");
+				oldPos.x = end.x; oldPos.y = end.y;
 				grid[end.x][end.y] = new Cell(end.x, end.y);
 				mouseOffX = (mouseX / cellSize - c.x)
 				mouseOffY = (mouseY / cellSize - c.y)
@@ -459,7 +461,7 @@ function removeFromArray(arr, el){
 
 function clearWalls(){
 	if(completed || failed) 
-		refresh();
+		newMaze();
 	if(!started){
 		for(var i = 0; i < ostacoli.length; i++)
 			ostacoli[i].wall = false;
@@ -472,7 +474,7 @@ function clearWalls(){
 
 function generateWalls(){
 	if(completed || failed)
-		refresh();
+		newMaze();
 	if(!started){
 		clearWalls();
 		for (i = 0; i < gridSize; i++){
@@ -487,7 +489,7 @@ function generateWalls(){
 		obs.clear();
 	}
 	else{
-		refresh();
+		newMaze();
 	}
 }
 
@@ -497,7 +499,7 @@ function startSimulation(){
 	document.getElementById("startButton").disabled = true;
 }
 
-function refresh(){
+function newMaze(){
 	drawBG = true;
 	drawOBS = true;
 
@@ -507,6 +509,8 @@ function refresh(){
 	started = false;
 
 	clear();
+	start = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
+	end = new Cell(Math.floor((random() * gridSize)), Math.floor((random() * gridSize)));
 	grid = initArray();
 	generateWalls();
 	
