@@ -36,6 +36,7 @@ var deleteWalls = false;
 var drawWalls = false;
 // The last cell I was in to avoid deleting a wall right after creating it and viceversa
 var lastWall;
+// Starting position of the dragged end/pos
 var oldPos = {x : undefined, y : undefined};
 // Offset of the mouse when something is selected
 var mouseOffX;
@@ -53,9 +54,12 @@ var end;
 // The last cell that has been considered in the algorithm
 var last;
 
+// Current id of the button pressed that specify the speed
 var lastSpeedID = "30fps";
 
-
+/**
+ * @description Setup function of the p5js framework.
+ */
 function setup() {
 	canvasSize = window.innerHeight - 15;
 	// Create the canvas and attach it to the div
@@ -91,6 +95,9 @@ function setup() {
 	frontiera.push(start);
 }
 
+/**
+ * @description drawing function called each frame by the p5js framework
+ */
 function draw(){ 
 	background(255);
 	/* 
@@ -204,6 +211,9 @@ function draw(){
 	end.drawCell(color(255, 0, 0), cellSize);
 }
 
+/**
+ * @description The A* algorithm itself.
+ */
 function algorithm(){
 	// If the open set is empty, the algorithm has failed;
 	if(frontiera.size() > 0){
@@ -255,6 +265,9 @@ function algorithm(){
 		}
         
     } else{
+		/**
+		 * The search has failed.
+		 */
 		document.getElementById("restartButton").disabled = false;
 		document.getElementById("pathLength").textContent = "∞";
 		document.getElementById("failCase").hidden = false;
@@ -266,15 +279,21 @@ function algorithm(){
 	}
 	return current;
 }
-/*
-* Calculate the distance between 2 given cells.
-*/
-function heuristic(cell, goal){
-	// MD
-	return Math.abs(goal.x - cell.x) + Math.abs(goal.y - cell.y);
-	//return dist(cell.x, cell.y, goal.x, goal.y)
+/** 
+ * @description Calculate the distance between 2 given cells.
+ * @param {Cell} a - the first cell.
+ * @param {Cell} b - the second cell.
+ * @returns The distance between the 2 cells.
+ */
+function heuristic(a, b){
+	// manhattan distance
+	return Math.abs(b.x - a.x) + Math.abs(b.y - a.y);
 }
 
+/**
+ *  @description 	Initialize the 2dimension array representing the grid of cells.
+ * 					Also add the neighbors for each cell.
+ */
 function initArray(){
     var tmp = [];
     for (i = 0; i < gridSize; i++){
@@ -297,16 +316,23 @@ function initArray(){
     return tmp;
 }
 
+/**
+ * @description Called if the mouse is dragged by the p5js framework.
+ */
 function mouseDragged(){
+	// If I'm in the canvas
 	if (mouseX > 0 && mouseX < canvasSize && mouseY > 0 && mouseY < canvasSize){
+		// Move the start point
 		if(dragStart){
 			start.x = mouseX / cellSize - mouseOffX;
 			start.y = mouseY / cellSize - mouseOffY;
 		}
+		// Move the end point
 		else if(dragEnd){
 			end.x = mouseX / cellSize - mouseOffX;
 			end.y = mouseY / cellSize - mouseOffY;
 		}
+		// Delete walls and redraw
 		else if(deleteWalls){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
 			if(lastWall != undefined && (c != lastWall) && c != start && c != end){
@@ -320,6 +346,7 @@ function mouseDragged(){
 				obs.clear();
 			}
 		}
+		// Add walls and redraw
 		else if(drawWalls){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
 			if(lastWall != undefined && (c != lastWall) && c != start && c != end){
@@ -334,7 +361,12 @@ function mouseDragged(){
 		}
 	}
 }	
+
+/**
+ * @description Called if the mouse is released by the p5js framework.
+ */
 function mouseReleased(){
+	// Place the start point in it's position, or reset if out of the canvas
 	if (dragStart){
 		dragStart = false;
 		if(mouseX < 0 || mouseX > canvasSize || mouseY < 0 || mouseY > canvasSize){
@@ -359,6 +391,8 @@ function mouseReleased(){
 		}
 		frontiera.push(start);
 	}
+
+	// Place the end point in it's position, or reset if out of the canvas
 	if (dragEnd){
 		dragEnd = false;
 		if(mouseX < 0 || mouseX > canvasSize || mouseY < 0 || mouseY > canvasSize){
@@ -382,6 +416,7 @@ function mouseReleased(){
 			end.neighbors[i].addNeighbors(grid);
 		}
 	}
+	// redraw obstacles.
 	if(deleteWalls){
 		deleteWalls = false;
 		drawOBS = true;
@@ -396,7 +431,12 @@ function mouseReleased(){
 			
 	}
 }
+
+/**
+ * @description Called if the mouse is pressed by the p5js framework.
+ */
 function mousePressed(){
+	// Only if the alg is not running.
 	if(! started){
 		if(mouseX < canvasSize && mouseX > 0 && mouseY > 0 && mouseY < canvasSize){
 			var c = grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)];
@@ -444,11 +484,19 @@ function mousePressed(){
 	}
 }
 
+/**
+ * @description Toggle the grid and call the draw function iin the case it's not already looping.
+ */
 function gridToggle(){
 	bgToggle = !bgToggle;
 	draw();
 }
 
+/**
+ * @description Remove element el from array arr.
+ * @param {Array} arr 	- The array from which the element needs to be removed.
+ * @param {Object} el 	- The element that needs to be removed from the array.
+ */
 function removeFromArray(arr, el){
 	for(var i = arr.length - 1; i >= 0; i--){
 		if(arr[i] === el){
@@ -459,6 +507,9 @@ function removeFromArray(arr, el){
 	return false;
 }
 
+/**
+ * @description Delete all the obstacles.
+ */
 function clearWalls(){
 	if(completed || failed) 
 		newMaze();
@@ -472,6 +523,9 @@ function clearWalls(){
 	document.getElementById("restartButton").disabled = true;
 }
 
+/**
+ * @description Generate random obstacles on the canvas.
+ */
 function generateWalls(){
 	if(completed || failed)
 		newMaze();
@@ -493,12 +547,18 @@ function generateWalls(){
 	}
 }
 
+/**
+ * @description Start the search algorithm.
+ */
 function startSimulation(){
 	started = true;
 	running = true;
 	document.getElementById("startButton").disabled = true;
 }
 
+/**
+ * @description Generate the new Maze without having to refresh the page.
+ */
 function newMaze(){
 	drawBG = true;
 	drawOBS = true;
@@ -530,6 +590,9 @@ function newMaze(){
 	loop();
 }
 
+/**
+ * @description Reset an already completed simulation.
+ */
 function restart(){
 	running = false;
 	failed = false;
@@ -548,7 +611,10 @@ function restart(){
 	loop();
 }
 
-
+/**
+ * @description Change the times per second the draw function is called.
+ * @param {int} id - the id of the button representing the speed that was pressed.
+ */
 function changeSpeed(id){
 	document.getElementById(lastSpeedID).classList.remove("active");
 	document.getElementById(id).classList.add("active");
